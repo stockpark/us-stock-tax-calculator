@@ -71,33 +71,27 @@
     document.getElementById("ocrStatus").innerText = "🔍 이미지 인식 중입니다...";
 
     const { createWorker } = Tesseract;
-    const worker = createWorker({
-      logger: m => console.log(m)
-    });
+    const worker = createWorker({ logger: m => console.log(m) });
 
     await worker.load();
     await worker.loadLanguage("eng+kor");
     await worker.initialize("eng+kor");
 
-    const {
-      data: { text }
-    } = await worker.recognize(file);
-
+    const { data: { text } } = await worker.recognize(file);
     await worker.terminate();
 
     document.getElementById("ocrStatus").innerText = "✅ 인식 완료!";
     document.getElementById("ocrResult").innerText = text;
 
-    // 🎯 자동 입력 채우기 시도
-    const tickerMatch = text.match(/[A-Z]{2,5}/); // 종목코드
-    const quantityMatch = text.match(/(\d+)\s*주/);
-    const buyPriceMatch = text.match(/매입[가|단가|가격]*[:：]?\s*([0-9.]+)/);
-    const currentPriceMatch = text.match(/현재[가|가격]*[:：]?\s*([0-9.]+)/);
+    // 🔍 종목명 목록 만들기 (영문 대문자 3~5자)
+    const tickerMatches = [...text.matchAll(/\b[A-Z]{2,5}\b/g)].map(m => m[0]);
+    const tickerCandidates = tickerMatches.filter(ticker => ['AAPL','TSLA','QQQ','SPY','NVDA','MSFT','PLTR','AMZN','GOOGL','META','URNM','URA','SQQQ','TQQQ','SOXL','AMD','INTC'].includes(ticker));
 
-    if (tickerMatch) document.querySelector('input[placeholder*="AAPL"]').value = tickerMatch[0];
-    if (quantityMatch) document.querySelector('input[placeholder*="100"]').value = quantityMatch[1];
-    if (buyPriceMatch) document.querySelector('input[placeholder*="120.5"]').value = buyPriceMatch[1];
-    if (currentPriceMatch) document.querySelector('input[placeholder*="140.3"]').value = currentPriceMatch[1];
+    // 자동 입력
+    if (tickerCandidates.length > 0) {
+      const ticker = tickerCandidates[0];
+      document.querySelector('input[placeholder*="AAPL"]').value = ticker;
+    }
   });
 </script>
 
