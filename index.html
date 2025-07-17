@@ -83,14 +83,25 @@
     document.getElementById("ocrStatus").innerText = "✅ 인식 완료!";
     document.getElementById("ocrResult").innerText = text;
 
-    // 🔍 종목명 목록 만들기 (영문 대문자 3~5자)
-    const tickerMatches = [...text.matchAll(/\b[A-Z]{2,5}\b/g)].map(m => m[0]);
-    const tickerCandidates = tickerMatches.filter(ticker => ['AAPL','TSLA','QQQ','SPY','NVDA','MSFT','PLTR','AMZN','GOOGL','META','URNM','URA','SQQQ','TQQQ','SOXL','AMD','INTC'].includes(ticker));
+    // 종목 코드 리스트
+    const tickers = ['AAPL','TSLA','QQQ','SPY','NVDA','MSFT','PLTR','AMZN','GOOGL','META','URNM','URA','SQQQ','TQQQ','SOXL','AMD','INTC'];
 
-    // 자동 입력
-    if (tickerCandidates.length > 0) {
-      const ticker = tickerCandidates[0];
-      document.querySelector('input[placeholder*="AAPL"]').value = ticker;
+    // 줄 단위로 나눔
+    const lines = text.split('\n');
+
+    for (const line of lines) {
+      for (const ticker of tickers) {
+        if (line.includes(ticker)) {
+          const numbers = line.replace(/[^0-9\s]/g, '').trim().split(/\s+/).map(n => parseInt(n.replace(/,/g, ''), 10)).filter(n => !isNaN(n));
+          if (numbers.length >= 3) {
+            document.querySelector('input[placeholder*="AAPL"]').value = ticker;
+            document.querySelector('input[placeholder*="100"]').value = numbers[0];     // 보유 수량
+            document.querySelector('input[placeholder*="120.5"]').value = numbers[1];   // 매입 단가
+            document.querySelector('input[placeholder*="140.3"]').value = numbers[2];   // 현재가
+            break;
+          }
+        }
+      }
     }
   });
 </script>
