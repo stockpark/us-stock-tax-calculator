@@ -83,22 +83,20 @@
     document.getElementById("ocrStatus").innerText = "✅ 인식 완료!";
     document.getElementById("ocrResult").innerText = text;
 
-    // 종목 코드 리스트
-    const tickers = ['AAPL','TSLA','QQQ','SPY','NVDA','MSFT','PLTR','AMZN','GOOGL','META','URNM','URA','SQQQ','TQQQ','SOXL','AMD','INTC'];
-
-    // 줄 단위로 나눔
     const lines = text.split('\n');
+    const tickers = ['AAPL','TSLA','QQQ','SPY','NVDA','MSFT','PLTR','AMZN','GOOGL','META','URNM','URA','SQQQ','TQQQ','SOXL','AMD','INTC'];
 
     for (const line of lines) {
       for (const ticker of tickers) {
         if (line.includes(ticker)) {
-          const numbers = line.replace(/[^0-9\s]/g, '').trim().split(/\s+/).map(n => parseInt(n.replace(/,/g, ''), 10)).filter(n => !isNaN(n));
-          if (numbers.length >= 3) {
+          // 숫자 추출
+          const nums = line.match(/\d{2,}/g); // 2자리 이상 숫자만 추출
+          if (nums && nums.length >= 3) {
             document.querySelector('input[placeholder*="AAPL"]').value = ticker;
-            document.querySelector('input[placeholder*="100"]').value = numbers[0];     // 보유 수량
-            document.querySelector('input[placeholder*="120.5"]').value = numbers[1];   // 매입 단가
-            document.querySelector('input[placeholder*="140.3"]').value = numbers[2];   // 현재가
-            break;
+            document.querySelector('input[placeholder*="100"]').value = nums[0];     // 보유 수량
+            document.querySelector('input[placeholder*="120.5"]').value = nums[1];   // 매입 단가
+            document.querySelector('input[placeholder*="140.3"]').value = nums[2];   // 현재가
+            return;
           }
         }
       }
