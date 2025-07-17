@@ -1,0 +1,1 @@
+async function convertUSDToKRW(amount) { /* API 연결 */ return amount * 1300; }
