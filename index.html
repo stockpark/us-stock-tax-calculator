@@ -1,1 +1,127 @@
-<!DOCTYPE html><html lang='ko'><head><meta charset='UTF-8'><title>양도소득세 계산기</title></head><body><h1>미국주식 양도소득세 계산기</h1></body></html>
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="미국 주식 양도소득세를 실시간으로 계산해보세요. 보유 종목, 수익, 환율 반영 기능 포함!">
+  <meta name="keywords" content="미국주식, 양도소득세, 주식세금계산기, 해외주식 세금">
+  <meta name="author" content="회장님">
+  <title>미국주식 양도소득세 계산기</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #fff7f7;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-bottom: 120px;
+    }
+    header {
+      background-color: #d32f2f;
+      color: white;
+      width: 100%;
+      padding: 1.5rem;
+      text-align: center;
+      font-size: 1.8rem;
+      font-weight: bold;
+    }
+    main {
+      max-width: 600px;
+      margin-top: 2rem;
+      width: 100%;
+      padding: 0 1rem;
+    }
+    label {
+      display: block;
+      margin-top: 1rem;
+      font-weight: 500;
+    }
+    input {
+      width: 100%;
+      padding: 0.5rem;
+      font-size: 1rem;
+      margin-top: 0.5rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    button {
+      margin-top: 1.5rem;
+      padding: 0.75rem 1.5rem;
+      font-size: 1.1rem;
+      background-color: #c62828;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .result {
+      margin-top: 2rem;
+      padding: 1rem;
+      border: 1px dashed #c62828;
+      background: #ffeaea;
+      border-radius: 6px;
+    }
+    footer {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      height: 90px;
+      background-color: #fff1f1;
+      border-top: 1px solid #ddd;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    미국주식 양도소득세 계산기
+  </header>
+  <main>
+    <label>총 매도금액 (₩)</label>
+    <input type="number" id="sell" placeholder="예: 10,000,000">
+
+    <label>총 매입금액 (₩)</label>
+    <input type="number" id="buy" placeholder="예: 8,000,000">
+
+    <label>기존 양도차익 합계 (₩)</label>
+    <input type="number" id="existing" value="1177195">
+
+    <button onclick="calculateTax()">계산하기</button>
+
+    <div class="result" id="output"></div>
+  </main>
+
+  <footer>
+    © 2025 미국주식 양도소득세 계산기
+  </footer>
+
+  <script>
+    function calculateTax() {
+      const sell = parseFloat(document.getElementById('sell').value) || 0;
+      const buy = parseFloat(document.getElementById('buy').value) || 0;
+      const existing = parseFloat(document.getElementById('existing').value) || 0;
+      const gain = sell - buy;
+      const totalGain = gain + existing;
+
+      let tax = 0;
+      let text = `총 양도차익: ${totalGain.toLocaleString()}원\n`;
+
+      if (totalGain <= 2500000) {
+        text += '✳️ 공제 대상입니다. 세금 없음.';
+      } else {
+        tax = (totalGain - 2500000) * 0.22;
+        text += `과세 대상: ${(totalGain - 2500000).toLocaleString()}원\n`;
+        text += `예상 세금 (22%): ${Math.floor(tax).toLocaleString()}원`;
+      }
+
+      document.getElementById('output').innerText = text;
+    }
+  </script>
+</body>
+</html>
