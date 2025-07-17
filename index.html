@@ -1,108 +1,32 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>실시간 미국주식 양도소득세 계산기</title>
-  <style>
-    body { font-family: 'Noto Sans KR', sans-serif; padding: 20px; max-width: 800px; margin: auto; }
-    h1 { color: darkred; }
-    label, select, input { display: block; margin: 10px 0; width: 100%; padding: 8px; }
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    th, td { border: 1px solid #ccc; padding: 10px; text-align: center; }
-    .result { font-weight: bold; margin-top: 20px; font-size: 1.2em; color: darkblue; }
-    footer { margin-top: 40px; text-align: center; font-size: 0.9em; color: gray; }
-  </style>
 </head>
 <body>
-  <h3>📸 보유현황 이미지 업로드</h3>
-<input type="file" id="imageUpload" accept="image/*" />
-<p id="ocrStatus">OCR 결과가 여기에 표시됩니다.</p>
-<pre id="ocrResult"></pre>
+  <h1>🇺🇸 실시간 미국주식 양도소득세 계산기</h1>
 
-  <h1>🇺🇸 미국주식 양도소득세 계산기</h1>
+  <form id="inputForm">
+    <label>종목명: <input id="ticker" type="text" required></label><br>
+    <label>보유수량: <input id="quantity" type="number" required></label><br>
+    <label>매입단가(USD): <input id="buyPrice" type="number" step="0.01" required></label><br>
+    <label>현재가(USD): <input id="currentPrice" type="number" step="0.01" required></label><br>
+    <button type="submit">계산하기</button>
+  </form>
 
-  <label>종목명: <input type="text" id="ticker" placeholder="예: AAPL"></label>
-  <label>보유 수량: <input type="number" id="quantity" placeholder="예: 100"></label>
-  <label>매입 단가(USD): <input type="number" id="buyPrice" placeholder="예: 120.5"></label>
-  <label>현재가(USD): <input type="number" id="currentPrice" placeholder="예: 140.3"></label>
-  <label>환율 (1달러당 원화): <input type="number" id="krwRate" placeholder="예: 1370" value="1370"></label>
-  <button onclick="calculate()">계산하기</button>
-
-  <div class="result" id="result"></div>
-
-  <footer>© 2025 미국주식 양도소득세 계산기 (Beta)</footer>
+  <div id="result"></div>
 
   <script>
-    function calculate() {
+    document.getElementById('inputForm').addEventListener('submit', function(e) {
+      e.preventDefault();
       const qty = parseFloat(document.getElementById('quantity').value);
       const buy = parseFloat(document.getElementById('buyPrice').value);
       const current = parseFloat(document.getElementById('currentPrice').value);
-      const rate = parseFloat(document.getElementById('krwRate').value);
-
-      if (isNaN(qty) || isNaN(buy) || isNaN(current) || isNaN(rate)) {
-        document.getElementById('result').innerText = "입력값을 모두 정확히 입력해주세요.";
-        return;
-      }
-
-      const gainUSD = (current - buy) * qty;
-      const gainKRW = gainUSD * rate;
-      const taxableKRW = Math.max(0, gainKRW - 2500000); // 기본 공제 250만 원
-      const tax = taxableKRW * 0.22;
-
-      let result = `총 양도차익: ${gainKRW.toLocaleString()}원`;
-
-      if (gainKRW <= 2500000) {
-        result += `\n➡️ 양도소득세 없음 (공제 범위)`;
-      } else {
-        result += `\n과세표준: ${taxableKRW.toLocaleString()}원`;
-        result += `\n예상 양도소득세 (22%): ${Math.round(tax).toLocaleString()}원`;
-      }
-
-      document.getElementById('result').innerText = result;
-    }
+      const gain = (current - buy) * qty;
+      document.getElementById('result').innerText = `총 양도차익: $${gain.toLocaleString()}`;
+    });
   </script>
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@2/dist/tesseract.min.js"></script>
-<script>
-  document.getElementById('imageUpload').addEventListener('change', async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    document.getElementById("ocrStatus").innerText = "🔍 이미지 인식 중입니다...";
-
-    const { createWorker } = Tesseract;
-    const worker = createWorker({ logger: m => console.log(m) });
-
-    await worker.load();
-    await worker.loadLanguage("eng+kor");
-    await worker.initialize("eng+kor");
-
-    const { data: { text } } = await worker.recognize(file);
-    await worker.terminate();
-
-    document.getElementById("ocrStatus").innerText = "✅ 인식 완료!";
-    document.getElementById("ocrResult").innerText = text;
-
-    const lines = text.split('\n');
-    const tickers = ['AAPL','TSLA','QQQ','SPY','NVDA','MSFT','PLTR','AMZN','GOOGL','META','URNM','URA','SQQQ','TQQQ','SOXL','AMD','INTC'];
-
-    for (const line of lines) {
-      for (const ticker of tickers) {
-        if (line.includes(ticker)) {
-          // 숫자 추출
-          const nums = line.match(/\d{2,}/g); // 2자리 이상 숫자만 추출
-          if (nums && nums.length >= 3) {
-            document.querySelector('input[placeholder*="AAPL"]').value = ticker;
-            document.querySelector('input[placeholder*="100"]').value = nums[0];     // 보유 수량
-            document.querySelector('input[placeholder*="120.5"]').value = nums[1];   // 매입 단가
-            document.querySelector('input[placeholder*="140.3"]').value = nums[2];   // 현재가
-            return;
-          }
-        }
-      }
-    }
-  });
-</script>
-
 </body>
 </html>
