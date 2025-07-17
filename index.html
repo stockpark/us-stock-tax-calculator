@@ -62,7 +62,7 @@
       document.getElementById('result').innerText = result;
     }
   </script>
-  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@2/dist/tesseract.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@2/dist/tesseract.min.js"></script>
 <script>
   document.getElementById('imageUpload').addEventListener('change', async (e) => {
     const file = e.target.files[0];
@@ -87,6 +87,17 @@
 
     document.getElementById("ocrStatus").innerText = "✅ 인식 완료!";
     document.getElementById("ocrResult").innerText = text;
+
+    // 🎯 자동 입력 채우기 시도
+    const tickerMatch = text.match(/[A-Z]{2,5}/); // 종목코드
+    const quantityMatch = text.match(/(\d+)\s*주/);
+    const buyPriceMatch = text.match(/매입[가|단가|가격]*[:：]?\s*([0-9.]+)/);
+    const currentPriceMatch = text.match(/현재[가|가격]*[:：]?\s*([0-9.]+)/);
+
+    if (tickerMatch) document.querySelector('input[placeholder*="AAPL"]').value = tickerMatch[0];
+    if (quantityMatch) document.querySelector('input[placeholder*="100"]').value = quantityMatch[1];
+    if (buyPriceMatch) document.querySelector('input[placeholder*="120.5"]').value = buyPriceMatch[1];
+    if (currentPriceMatch) document.querySelector('input[placeholder*="140.3"]').value = currentPriceMatch[1];
   });
 </script>
 
