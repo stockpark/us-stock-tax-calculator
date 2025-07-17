@@ -2,31 +2,100 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>실시간 미국주식 양도소득세 계산기</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 20px;
+    }
+    table, th, td {
+      border: 1px solid #aaa;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 8px;
+    }
+    input[type="number"], input[type="text"] {
+      width: 100px;
+    }
+    button {
+      margin-top: 10px;
+    }
+  </style>
 </head>
 <body>
-  <h1>실시간 미국주식 양도소득세 계산기</h1>
+  <h1>🇺🇸 미국주식 양도소득세 계산기</h1>
+  <table id="stockTable">
+    <thead>
+      <tr>
+        <th>종목명</th>
+        <th>보유수량</th>
+        <th>매입단가 (USD)</th>
+        <th>현재가 (USD)</th>
+        <th>삭제</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody">
+      <tr>
+        <td><input type="text" /></td>
+        <td><input type="number" /></td>
+        <td><input type="number" step="0.01" /></td>
+        <td><input type="number" step="0.01" /></td>
+        <td><button onclick="deleteRow(this)">삭제</button></td>
+      </tr>
+    </tbody>
+  </table>
+  <button onclick="addRow()">종목 추가</button>
+  <button onclick="calculate()">양도소득세 계산</button>
 
-  <form id="inputForm">
-    <label>종목명: <input id="ticker" type="text" required></label><br>
-    <label>보유수량: <input id="quantity" type="number" required></label><br>
-    <label>매입단가(USD): <input id="buyPrice" type="number" step="0.01" required></label><br>
-    <label>현재가(USD): <input id="currentPrice" type="number" step="0.01" required></label><br>
-    <button type="submit">계산하기</button>
-  </form>
-
+  <h3>결과</h3>
   <div id="result"></div>
 
   <script>
-    document.getElementById('inputForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      const qty = parseFloat(document.getElementById('quantity').value);
-      const buy = parseFloat(document.getElementById('buyPrice').value);
-      const current = parseFloat(document.getElementById('currentPrice').value);
-      const gain = (current - buy) * qty;
-      document.getElementById('result').innerText = `총 양도차익: $${gain.toLocaleString()}`;
-    });
+    function addRow() {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td><input type="text" /></td>
+        <td><input type="number" /></td>
+        <td><input type="number" step="0.01" /></td>
+        <td><input type="number" step="0.01" /></td>
+        <td><button onclick="deleteRow(this)">삭제</button></td>
+      `;
+      document.getElementById('tableBody').appendChild(row);
+    }
+
+    function deleteRow(btn) {
+      const row = btn.parentNode.parentNode;
+      row.remove();
+    }
+
+    function calculate() {
+      const rows = document.querySelectorAll('#tableBody tr');
+      let totalGain = 0;
+      let html = '<ul>';
+      rows.forEach(row => {
+        const cells = row.querySelectorAll('input');
+        const name = cells[0].value || '종목';
+        const qty = parseFloat(cells[1].value) || 0;
+        const buy = parseFloat(cells[2].value) || 0;
+        const now = parseFloat(cells[3].value) || 0;
+        const gain = (now - buy) * qty;
+        totalGain += gain;
+        html += `<li>${name}: $${gain.toLocaleString(undefined, {maximumFractionDigits: 2})}</li>`;
+      });
+      html += '</ul>';
+
+      const KRWperUSD = 1; // 환율 기능 붙이면 이걸 바꿔줌
+      const 공제 = 2500000 / KRWperUSD;
+      const 과세표준 = Math.max(0, totalGain - 공제);
+      const 세금 = Math.round(과세표준 * 0.22 * 100) / 100;
+
+      html += `<p><strong>총 수익: $${totalGain.toLocaleString(undefined, {maximumFractionDigits: 2})}</strong></p>`;
+      html += `<p>공제금액: $${공제.toLocaleString()}</p>`;
+      html += `<p>과세표준: $${과세표준.toLocaleString(undefined, {maximumFractionDigits: 2})}</p>`;
+      html += `<p><strong>예상 양도소득세: $${세금.toLocaleString(undefined, {maximumFractionDigits: 2})}</strong></p>`;
+      document.getElementById('result').innerHTML = html;
+    }
   </script>
 </body>
 </html>
