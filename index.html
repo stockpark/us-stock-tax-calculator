@@ -47,7 +47,11 @@
   </table>
   <button onclick="addRow()">종목 추가</button>
   <button onclick="calculate()">양도소득세 계산</button>
-
+<div>
+  <label for="exchange-rate">환율 (1달러당 원화):</label>
+  <input type="number" id="exchange-rate" placeholder="예: 1370">
+  <button onclick="fetchExchangeRate()">💱 환율 불러오기</button>
+</div>
   <h3>결과</h3>
   <div id="result"></div>
 
@@ -97,5 +101,24 @@
       document.getElementById('result').innerHTML = html;
     }
   </script>
+  <script>
+async function fetchExchangeRate() {
+  const accessKey = 18a9dfac56ddbcc42401bb6d1ab0a2f8; // 여기에 복사한 키 넣어줘!
+  const url = `https://api.exchangerate.host/latest?base=USD&symbols=KRW&access_key=${accessKey}`;
+
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+    if (data.success === false) {
+      throw new Error(data.error?.info || "환율 데이터를 불러오지 못했습니다.");
+    }
+
+    const rate = data.rates.KRW;
+    document.getElementById("exchange-rate").value = rate;
+  } catch (error) {
+    alert("환율 불러오기 실패: " + error.message);
+  }
+}
+</script>
 </body>
 </html>
